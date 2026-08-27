@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+  <!-- Background rounded square -->
+  <rect width="48" height="48" rx="12" fill="url(#bg_grad)"/>
+  
+  <!-- Document body -->
+  <rect x="12" y="8" width="20" height="26" rx="3" fill="white" fill-opacity="0.18"/>
+  <rect x="12" y="8" width="20" height="26" rx="3" stroke="white" stroke-opacity="0.55" stroke-width="1.5"/>
+  
+  <!-- Document lines (notice text) -->
+  <line x1="16" y1="14" x2="28" y2="14" stroke="white" stroke-opacity="0.8" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="16" y1="18" x2="28" y2="18" stroke="white" stroke-opacity="0.6" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="16" y1="22" x2="23" y2="22" stroke="white" stroke-opacity="0.4" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Action arrow / lightning bolt — bottom right -->
+  <circle cx="33" cy="33" r="9" fill="url(#action_grad)"/>
+  <!-- Lightning bolt / checkmark arrow -->
+  <path d="M29.5 33.5L31.8 35.8L36.5 30.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <defs>
+    <linearGradient id="bg_grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="action_grad" x1="24" y1="24" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+</svg>
