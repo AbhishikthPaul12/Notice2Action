@@ -168,8 +168,4 @@ This project includes a `render.yaml` Blueprint file for automatic full-stack de
 4. Set the `OPENAI_API_KEY` environment variable when prompted.
 5. Click **Apply**. Render will automatically build and deploy both backend and static frontend!
 
----
 
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
