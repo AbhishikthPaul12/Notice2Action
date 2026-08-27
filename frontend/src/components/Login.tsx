@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Mail, Lock, ArrowRight, Sparkles, User as UserIcon } from 'lucide-react';
-import { loginUser, registerUser } from '../services/api';
+import { Shield, Mail, Lock, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (name: string, email: string) => void;
@@ -12,27 +11,26 @@ export default function Login({ onLogin }: LoginProps) {
   const [name, setName] = useState('John Doe');
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setError('');
+    if (!email.trim()) { setError('Please enter your email.'); return; }
+    if (!password.trim()) { setError('Please enter your password.'); return; }
 
-    try {
-      if (isRegistering) {
-        const user = await registerUser(name, email, password);
-        onLogin(user.name, user.email);
-      } else {
-        const user = await loginUser(email, password);
-        onLogin(user.name, user.email);
-      }
-    } catch (err) {
-      console.error('Auth submit error:', err);
-      // Fallback
-      const fallbackName = name || email.split('@')[0];
-      onLogin(fallbackName, email);
-    } finally {
+    setIsLoading(true);
+    // Client-side auth — no backend DB needed
+    const resolvedName = (isRegistering ? name.trim() : '') || email.split('@')[0];
+    const displayName = resolvedName.charAt(0).toUpperCase() + resolvedName.slice(1);
+
+    // Brief success flash before transitioning
+    setSuccess(true);
+    setTimeout(() => {
+      onLogin(displayName, email.trim());
       setIsLoading(false);
-    }
+    }, 800);
   };
 
   return (
@@ -104,18 +102,22 @@ export default function Login({ onLogin }: LoginProps) {
               </div>
             </div>
 
+            {error && (
+              <p className="text-xs text-rose-600 font-medium text-center -mt-1">{error}</p>
+            )}
+
             <button
               type="submit"
-              disabled={isLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 mt-2"
+              disabled={isLoading || success}
+              className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white shadow-sm transition-all duration-300 mt-2 disabled:opacity-80
+                ${success ? 'bg-emerald-500' : 'bg-indigo-600 hover:bg-indigo-700'}`}
             >
-              {isLoading ? (
-                <span>Securing session...</span>
+              {success ? (
+                <><CheckCircle size={16} /><span>Signed in!</span></>
+              ) : isLoading ? (
+                <span>Signing in...</span>
               ) : (
-                <>
-                  <span>{isRegistering ? 'Create Account' : 'Sign In'}</span>
-                  <ArrowRight size={16} />
-                </>
+                <><span>{isRegistering ? 'Create Account' : 'Sign In'}</span><ArrowRight size={16} /></>
               )}
             </button>
           </form>
