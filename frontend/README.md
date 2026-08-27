@@ -109,8 +109,4 @@ npm run build
 - **Ask Notice2Action Assistant**: Integrated Q&A chat panel connected to backend `/api/ask`.
 - **Dark Mode Support**: Applied to document root and persisted across reloads.
 
----
 
-## 📄 License
-
-MIT License — see [LICENSE](../LICENSE) file.
