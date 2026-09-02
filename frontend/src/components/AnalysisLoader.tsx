@@ -1,54 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles } from 'lucide-react';
+import { FileText, Cpu } from 'lucide-react';
+
+const steps = [
+  { id: '01', title: 'READING DOCUMENT GEOMETRY', subtitle: 'Extracting raw paragraphs & structure' },
+  { id: '02', title: 'SCANNING FOR TIME-CRITICAL DEADLINES', subtitle: 'Analyzing dates & countdown urgency' },
+  { id: '03', title: 'PARSING ELIGIBILITY CRITERIA', subtitle: 'Evaluating conditions and prerequisites' },
+  { id: '04', title: 'STRUCTURING ACTION CHECKLIST', subtitle: 'Formulating step-by-step resolution plan' },
+];
 
 export default function AnalysisLoader() {
-  const steps = [
-    'Reading your notice...',
-    'Extracting important information...',
-    'Identifying deadlines...',
-    'Building your action plan...',
-  ];
-
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [counter, setCounter] = useState(18);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const stepTimer = setInterval(() => {
       setCurrentStepIndex((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, 2000);
+    }, 1200);
 
-    return () => clearInterval(interval);
+    const counterTimer = setInterval(() => {
+      setCounter((prev) => {
+        if (prev >= 98) return 98;
+        return prev + Math.floor(Math.random() * 12) + 4;
+      });
+    }, 250);
+
+    return () => {
+      clearInterval(stepTimer);
+      clearInterval(counterTimer);
+    };
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto my-8">
-      {/* Dynamic pulsating indicator */}
-      <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 mb-6 shadow-sm">
-        <Sparkles size={32} className="animate-pulse" />
-        <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-4 w-4 bg-indigo-500"></span>
+    <div className="flex flex-col items-center justify-center p-8 md:p-14 text-center max-w-xl mx-auto my-6 bg-ink border border-neutral/20 rounded-xl text-paper relative overflow-hidden">
+      {/* Animated subtle scanline */}
+      <div className="absolute inset-x-0 h-px bg-accent/60 shadow-[0_0_12px_#5B6CFF] animate-pulse" style={{ top: `${(currentStepIndex + 1) * 20}%` }} />
+
+      {/* Top technical tag */}
+      <div className="flex items-center gap-2 mb-6">
+        <Cpu size={14} className="text-accent animate-spin" />
+        <span className="text-[10px] font-mono tracking-[0.25em] text-accent uppercase">
+          INTELLIGENCE PIPELINE ENGAGED
         </span>
       </div>
 
-      <h3 className="text-lg font-bold text-slate-800 tracking-tight">
-        Analyzing Document
-      </h3>
-      
-      {/* Animated text transition */}
-      <p className="text-sm font-medium text-indigo-600 mt-2 h-6 animate-pulse">
-        {steps[currentStepIndex]}
-      </p>
+      {/* Main Counter */}
+      <div className="mb-6">
+        <span className="font-mono text-5xl md:text-6xl font-black tracking-tight text-paper tabular-nums">
+          {String(Math.min(counter, 99)).padStart(2, '0')}%
+        </span>
+      </div>
 
-      {/* Modern skeleton simulation */}
-      <div className="w-full mt-8 space-y-3.5">
-        <div className="h-4 bg-slate-100 rounded-full w-3/4 mx-auto animate-pulse" />
-        <div className="h-3 bg-slate-100 rounded-full w-5/6 mx-auto animate-pulse" />
-        <div className="h-3 bg-slate-100 rounded-full w-2/3 mx-auto animate-pulse" />
-        
-        <div className="pt-4 flex justify-center gap-3">
-          <div className="h-8 w-24 bg-slate-100 rounded-lg animate-pulse" />
-          <div className="h-8 w-24 bg-slate-100 rounded-lg animate-pulse" />
-        </div>
+      {/* Active Step */}
+      <div className="h-14 flex flex-col items-center justify-center">
+        <p className="text-sm md:text-base font-mono font-bold tracking-wider text-paper uppercase">
+          <span className="text-accent mr-2">{steps[currentStepIndex].id} //</span>
+          {steps[currentStepIndex].title}
+        </p>
+        <p className="text-xs font-mono text-neutral/70 mt-1">
+          {steps[currentStepIndex].subtitle}
+        </p>
+      </div>
+
+      {/* Stepper lines */}
+      <div className="grid grid-cols-4 gap-2 w-full mt-8 pt-6 border-t border-neutral/15">
+        {steps.map((step, idx) => (
+          <div key={step.id} className="text-left">
+            <div className={`h-1 w-full rounded-full transition-colors duration-300 ${
+              idx <= currentStepIndex ? 'bg-accent shadow-[0_0_6px_rgba(91,108,255,0.6)]' : 'bg-neutral/20'
+            }`} />
+            <span className="text-[9px] font-mono text-neutral/60 mt-1.5 block tabular-nums">
+              STEP {step.id}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -8,6 +8,12 @@ export default {
   theme: {
     extend: {
       colors: {
+        ink: '#080808',
+        paper: '#F4F2EC',
+        neutral: '#A8A8A0',
+        'dark-gray': '#202120',
+        accent: '#5B6CFF',
+        'accent-dim': '#3D4ABF',
         brand: {
           50: '#f4f6fc',
           100: '#e8ecf7',

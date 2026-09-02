@@ -13,9 +13,19 @@ export interface ActionItem {
 
 export interface NoticeAnalysis {
   title: string;
+  notice_type?: string;
   category?: string;
-  summary: string;
+  target_audience?: string;
+  action_required?: string;
   deadline: Deadline;
+  start_date?: string | null;
+  penalty?: string | null;
+  documents_required?: string[];
+  where_to_act?: string | null;
+  contact?: string | null;
+  priority?: string;
+  status?: string;
+  summary: string;
   eligibility: string[];
   actions: ActionItem[];
   important_points: string[];

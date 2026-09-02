@@ -1,11 +1,36 @@
 import React, { useState, useRef } from 'react';
-import { Upload, FileText, Trash2, AlertCircle, Type, Sparkles } from 'lucide-react';
+import { Upload, FileText, Trash2, AlertCircle, Type, Sparkles, ArrowRight, Check } from 'lucide-react';
 
 interface UploadZoneProps {
   onAnalyze: (file: File) => void;
   onAnalyzeText?: (text: string) => void;
   isAnalyzing: boolean;
 }
+
+const SAMPLE_NOTICE = `NOTICE NO. 47/2026
+APPLICATION FOR NATIONAL MERIT SCHOLARSHIP 2026-27
+
+ELIGIBILITY:
+1. Candidates currently enrolled in the final year of their undergraduate programme at any recognized university or institution are eligible to apply.
+2. Applicants must have obtained a minimum cumulative grade point average of 7.5 on a 10-point scale or 75% equivalent in their most recent semester examination.
+3. Students who have previously received any other government scholarship during the current academic year shall not be eligible.
+
+IMPORTANT DATES:
+- Portal Opens: 01 August 2026
+- Last Date for Online Submission: 18 September 2026 (11:59 PM IST)
+- Deficiency Correction Window: 19 September – 25 September 2026
+- Declaration of Merit List: 15 October 2026
+
+DOCUMENTS REQUIRED:
+1. Valid government-issued photo identity proof (Aadhaar Card / Passport / Voter ID)
+2. Academic mark sheets and grade cards for all completed semesters
+3. Recent passport-size photograph (taken within the last 3 months)
+4. Completed and signed application form (Form N2A-47)
+
+ACTION ITEMS:
+- Complete online registration before 18 September 2026.
+- Upload self-attested copies of all mark sheets and identity proof.
+- Retain a printed copy of the final submitted application form for institutional verification.`;
 
 export default function UploadZone({ onAnalyze, onAnalyzeText, isAnalyzing }: UploadZoneProps) {
   const [activeTab, setActiveTab] = useState<'file' | 'text'>('file');
@@ -16,7 +41,7 @@ export default function UploadZone({ onAnalyze, onAnalyzeText, isAnalyzing }: Up
   const inputRef = useRef<HTMLInputElement>(null);
 
   const allowedExtensions = ['.pdf', '.docx', '.txt'];
-  const maxSizeBytes = 10 * 1024 * 1024; // 10 MB
+  const maxSizeBytes = 10 * 1024 * 1024;
 
   const validateFile = (file: File): boolean => {
     setError(null);
@@ -68,10 +93,6 @@ export default function UploadZone({ onAnalyze, onAnalyzeText, isAnalyzing }: Up
     }
   };
 
-  const handleButtonClick = () => {
-    inputRef.current?.click();
-  };
-
   const handleRemove = () => {
     setSelectedFile(null);
     setError(null);
@@ -86,6 +107,12 @@ export default function UploadZone({ onAnalyze, onAnalyzeText, isAnalyzing }: Up
     }
   };
 
+  const handleLoadSample = () => {
+    setActiveTab('text');
+    setPastedText(SAMPLE_NOTICE);
+    setError(null);
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -95,26 +122,41 @@ export default function UploadZone({ onAnalyze, onAnalyzeText, isAnalyzing }: Up
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      {/* Mode Switcher Tabs */}
-      <div className="flex items-center justify-center gap-2 mb-4 bg-slate-100 p-1 rounded-xl max-w-xs mx-auto border border-slate-200">
+    <div className="w-full max-w-3xl mx-auto text-paper">
+      {/* Tab Switcher */}
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center bg-dark-gray p-1 rounded-lg border border-neutral/20">
+          <button
+            onClick={() => { setActiveTab('file'); setError(null); }}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase rounded-md transition-all ${
+              activeTab === 'file'
+                ? 'bg-paper text-ink font-bold shadow-sm'
+                : 'text-neutral hover:text-paper'
+            }`}
+          >
+            <Upload size={13} />
+            <span>Document Upload</span>
+          </button>
+          <button
+            onClick={() => { setActiveTab('text'); setError(null); }}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-wider uppercase rounded-md transition-all ${
+              activeTab === 'text'
+                ? 'bg-paper text-ink font-bold shadow-sm'
+                : 'text-neutral hover:text-paper'
+            }`}
+          >
+            <Type size={13} />
+            <span>Paste Text</span>
+          </button>
+        </div>
+
+        {/* Quick Sample Button */}
         <button
-          onClick={() => { setActiveTab('file'); setError(null); }}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-            activeTab === 'file' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-          }`}
+          onClick={handleLoadSample}
+          className="text-[11px] font-mono text-accent hover:text-paper border border-accent/30 hover:border-accent bg-accent/5 px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer uppercase tracking-wider"
         >
-          <Upload size={14} />
-          Upload Document
-        </button>
-        <button
-          onClick={() => { setActiveTab('text'); setError(null); }}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-            activeTab === 'text' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-          }`}
-        >
-          <Type size={14} />
-          Paste Text
+          <Sparkles size={12} />
+          <span>Load Sample Notice</span>
         </button>
       </div>
 
@@ -125,12 +167,12 @@ export default function UploadZone({ onAnalyze, onAnalyzeText, isAnalyzing }: Up
             onDragOver={handleDrag}
             onDragLeave={handleDrag}
             onDrop={handleDrop}
-            onClick={handleButtonClick}
+            onClick={() => inputRef.current?.click()}
             className={`
-              relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 text-center cursor-pointer transition-all duration-200
+              relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-12 md:p-16 text-center cursor-pointer transition-all duration-300
               ${dragActive 
-                ? 'border-indigo-500 bg-indigo-50/50' 
-                : 'border-slate-300 hover:border-indigo-400 bg-white hover:bg-slate-50/50'}
+                ? 'border-accent bg-accent/10 scale-[1.01]' 
+                : 'border-neutral/25 hover:border-paper/60 bg-dark-gray/60 hover:bg-dark-gray'}
             `}
           >
             <input
@@ -142,90 +184,106 @@ export default function UploadZone({ onAnalyze, onAnalyzeText, isAnalyzing }: Up
               disabled={isAnalyzing}
             />
             
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 mb-4 transition-transform group-hover:scale-110">
-              <Upload size={24} />
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-neutral/20 bg-ink text-neutral mb-5 group-hover:text-accent transition-colors">
+              <Upload size={24} className="text-accent" />
             </div>
             
-            <p className="text-base font-semibold text-slate-800">
-              Drop your notice here
+            <p className="text-base md:text-lg font-bold text-paper uppercase tracking-wider font-mono">
+              DROP YOUR NOTICE HERE
             </p>
-            <p className="text-sm text-slate-500 mt-1">
-              or click to browse
+            <p className="text-xs font-mono text-neutral mt-2 uppercase tracking-widest">
+              or click to browse local files
             </p>
-            <p className="text-xs text-slate-400 mt-4">
-              Supports PDF, DOCX, TXT up to 10MB
-            </p>
+            
+            <div className="flex items-center gap-3 mt-6 pt-6 border-t border-neutral/15 text-[10px] font-mono text-neutral/60 uppercase tracking-widest">
+              <span>PDF</span>
+              <span>•</span>
+              <span>DOCX</span>
+              <span>•</span>
+              <span>TXT</span>
+              <span>•</span>
+              <span>UP TO 10MB</span>
+            </div>
           </div>
         ) : (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                  <FileText size={20} />
+          <div className="rounded-xl border border-neutral/20 bg-dark-gray p-6 md:p-8 text-left shadow-2xl">
+            <div className="flex items-center justify-between border-b border-neutral/15 pb-5 mb-6">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-ink border border-neutral/20 text-accent">
+                  <FileText size={24} />
                 </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-sm font-semibold text-slate-800 line-clamp-1 max-w-sm sm:max-w-md">
+                <div>
+                  <h4 className="text-sm md:text-base font-mono font-bold text-paper uppercase truncate max-w-sm sm:max-w-md">
                     {selectedFile.name}
-                  </span>
-                  <span className="text-xs text-slate-400 mt-0.5">
+                  </h4>
+                  <p className="text-xs font-mono text-neutral/70 mt-1">
                     {formatFileSize(selectedFile.size)} • {selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toUpperCase().substring(1)}
-                  </span>
+                  </p>
                 </div>
               </div>
               
               <button
                 onClick={handleRemove}
                 disabled={isAnalyzing}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-50 hover:text-rose-600 transition-colors disabled:opacity-50"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral/20 hover:border-rose-500 text-neutral hover:text-rose-400 transition-colors"
+                title="Remove file"
               >
-                <Trash2 size={18} />
+                <Trash2 size={16} />
               </button>
             </div>
             
             <button
               onClick={handleAnalyzeClick}
               disabled={isAnalyzing}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-3 rounded-lg bg-paper hover:bg-accent text-ink hover:text-white py-3.5 text-xs font-mono font-bold uppercase tracking-[0.2em] transition-all duration-300 cursor-pointer shadow-lg disabled:opacity-50"
             >
-              {isAnalyzing ? 'Analyzing Notice...' : 'Analyze Document'}
+              <span>{isAnalyzing ? 'Analyzing Notice...' : 'Process & Extract Action Plan'}</span>
+              <ArrowRight size={14} />
             </button>
           </div>
         )
       ) : (
-        /* Text Snippet Tab */
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-left">
-          <label className="block text-sm font-semibold text-slate-800 mb-2">
-            Paste Notice Text Snippet
-          </label>
+        /* Text Snippet Mode */
+        <div className="rounded-xl border border-neutral/20 bg-dark-gray p-6 md:p-8 text-left shadow-2xl">
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-xs font-mono font-bold uppercase tracking-wider text-paper">
+              Paste Raw Notice or Circular Text
+            </label>
+            <span className="text-[10px] font-mono text-neutral/60">
+              {pastedText.trim().length} characters
+            </span>
+          </div>
+          
           <textarea
             value={pastedText}
             onChange={(e) => setPastedText(e.target.value)}
             disabled={isAnalyzing}
-            placeholder="Paste raw notice text, announcement email, or circular text here..."
-            className="w-full h-44 rounded-xl border border-slate-200 p-3.5 text-xs text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none resize-none"
+            placeholder="Paste circular announcement, scholarship requirements, or exam schedule here..."
+            className="w-full h-52 rounded-lg border border-neutral/20 bg-ink p-4 font-mono text-xs text-paper placeholder-neutral/40 focus:border-accent focus:outline-none resize-none leading-relaxed"
           />
-          <div className="flex items-center justify-between mt-3">
-            <span className="text-xs text-slate-400">
-              {pastedText.trim().length} characters (minimum 10)
+          
+          <div className="flex items-center justify-between mt-4">
+            <span className="text-[11px] font-mono text-neutral/60">
+              Minimum 10 characters required
             </span>
             <button
               onClick={handleAnalyzeClick}
               disabled={isAnalyzing || pastedText.trim().length < 10}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 rounded-lg bg-paper hover:bg-accent text-ink hover:text-white px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-wider transition-all disabled:opacity-40 cursor-pointer"
             >
-              <Sparkles size={14} />
-              {isAnalyzing ? 'Analyzing Text...' : 'Analyze Text'}
+              <Sparkles size={13} />
+              <span>{isAnalyzing ? 'Analyzing...' : 'Analyze Text'}</span>
             </button>
           </div>
         </div>
       )}
       
       {error && (
-        <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-rose-50 p-4 text-left text-sm text-rose-800 border border-rose-100">
-          <AlertCircle size={18} className="text-rose-600 shrink-0 mt-0.5" />
-          <div className="flex flex-col">
-            <span className="font-semibold">Upload Error</span>
-            <span className="mt-0.5">{error}</span>
+        <div className="mt-4 flex items-start gap-3 rounded-lg bg-rose-950/40 p-4 text-left border border-rose-800/40 text-rose-300 font-mono text-xs">
+          <AlertCircle size={16} className="text-rose-400 shrink-0 mt-0.5" />
+          <div>
+            <span className="font-bold uppercase block mb-0.5">Upload Error</span>
+            <span>{error}</span>
           </div>
         </div>
       )}

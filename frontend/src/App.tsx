@@ -7,6 +7,7 @@ import MyNotices from './pages/MyNotices';
 import NoticeDetail from './pages/NoticeDetail';
 import HowItWorks from './pages/HowItWorks';
 import Settings from './pages/Settings';
+import LandingPage from './pages/LandingPage';
 
 interface User {
   name: string;
@@ -20,9 +21,18 @@ interface NotificationItem {
   read: boolean;
 }
 
+// Determine initial page from URL path
+const getPageFromPath = (): string => {
+  const path = window.location.pathname.replace(/^\/+/, '');
+  if (!path || path === '' || path === 'index.html') {
+    return 'landing';
+  }
+  return path;
+};
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
-  const [currentPage, setCurrentPage] = useState<string>('dashboard');
+  const [currentPage, setCurrentPageState] = useState<string>(() => getPageFromPath());
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -31,6 +41,24 @@ export default function App() {
       return prefs.darkMode ?? false;
     } catch { return false; }
   });
+
+  // URL route updater helper
+  const setCurrentPage = (page: string) => {
+    setCurrentPageState(page);
+    const targetPath = page === 'landing' ? '/' : `/${page}`;
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({ page }, '', targetPath);
+    }
+  };
+
+  // Listen to browser Back / Forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPageState(getPageFromPath());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Apply / remove dark class on <html> whenever darkMode changes
   useEffect(() => {
@@ -55,7 +83,6 @@ export default function App() {
       if (savedNotifs) {
         setNotifications(JSON.parse(savedNotifs));
       } else {
-        // Seed default notification
         const welcomeNotif = {
           id: 'welcome',
           text: 'Welcome to Notice2Action! Try uploading a notice to start.',
@@ -66,7 +93,6 @@ export default function App() {
         localStorage.setItem('notice2action_notifs', JSON.stringify([welcomeNotif]));
       }
 
-      // Request browser notification permission
       if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
       }
@@ -79,15 +105,14 @@ export default function App() {
     const newUser = { name, email };
     setUser(newUser);
     localStorage.setItem('notice2action_user', JSON.stringify(newUser));
-    
-    // Add success login notification
+    setCurrentPage('dashboard');
     addNotification(`Signed in successfully as ${name}`);
   };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('notice2action_user');
-    setCurrentPage('dashboard');
+    setCurrentPage('landing');
   };
 
   const addNotification = (text: string) => {
@@ -104,7 +129,6 @@ export default function App() {
       return updated;
     });
 
-    // Send browser push notification if permitted
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('Notice2Action Alert', {
         body: text,
@@ -121,10 +145,49 @@ export default function App() {
     });
   };
 
-  // Helper for rendering the correct page based on state router
+  // 1. Landing page view (Whenever at root / or 'landing')
+  if (currentPage === 'landing') {
+    return (
+      <div className="relative min-h-screen bg-ink">
+        <LandingPage
+          onEnterApp={() => {
+            if (user) {
+              setCurrentPage('dashboard');
+            } else {
+              setCurrentPage('login');
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  // 2. Sign In / Sign Up view
+  if (currentPage === 'login' || (!user && currentPage === 'dashboard')) {
+    return (
+      <div className="relative min-h-screen bg-ink">
+        <div className="absolute top-6 left-6 z-50">
+          <button
+            onClick={() => setCurrentPage('landing')}
+            className="px-4 py-2 rounded-lg bg-dark-gray hover:bg-neutral/20 text-paper font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer border border-neutral/20 backdrop-blur-md"
+          >
+            ← Back to Landing Page
+          </button>
+        </div>
+        <Login onLogin={handleLogin} />
+      </div>
+    );
+  }
+
+  // 3. Authenticated Workspace Pages (/dashboard, /notices, etc.)
   const renderPage = () => {
     if (currentPage === 'dashboard') {
-      return <Dashboard setCurrentPage={setCurrentPage} onNoticeAnalyzed={(title) => addNotification(`Notice analyzed successfully: "${title}"`)} />;
+      return (
+        <Dashboard
+          setCurrentPage={setCurrentPage}
+          onNoticeAnalyzed={(title) => addNotification(`Notice analyzed successfully: "${title}"`)}
+        />
+      );
     }
     if (currentPage === 'notices') {
       return <MyNotices setCurrentPage={setCurrentPage} />;
@@ -142,7 +205,6 @@ export default function App() {
     return <Dashboard setCurrentPage={setCurrentPage} />;
   };
 
-  // Helper for updating header title dynamically
   const getHeaderInfo = () => {
     if (currentPage === 'dashboard') {
       return {
@@ -180,15 +242,10 @@ export default function App() {
     };
   };
 
-  // If user is not logged in, force Login screen
-  if (!user) {
-    return <Login onLogin={handleLogin} />;
-  }
-
   const headerInfo = getHeaderInfo();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-ink flex text-paper">
       {/* Sidebar navigation */}
       <Sidebar 
         currentPage={currentPage} 

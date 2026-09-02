@@ -3,13 +3,12 @@ import {
   Search, 
   Filter, 
   Calendar, 
-  AlertTriangle, 
-  CheckCircle2, 
   ArrowUpDown, 
   Clock, 
   Inbox,
   ArrowRight,
-  Plus
+  Plus,
+  FileText
 } from 'lucide-react';
 import { SavedNotice } from '../types';
 import { getSavedNotices } from '../services/api';
@@ -27,7 +26,6 @@ export default function MyNotices({ setCurrentPage }: MyNoticesProps) {
   const [filterUrgency, setFilterUrgency] = useState<FilterOption>('all');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
 
-  // Load notices on mount
   useEffect(() => {
     setNotices(getSavedNotices());
   }, []);
@@ -36,7 +34,6 @@ export default function MyNotices({ setCurrentPage }: MyNoticesProps) {
     setCurrentPage(`notices/${id}`);
   };
 
-  // Helper for formatting date
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
       month: 'short',
@@ -45,7 +42,6 @@ export default function MyNotices({ setCurrentPage }: MyNoticesProps) {
     });
   };
 
-  // Filters & sorts
   const filteredNotices = notices
     .filter((notice) => {
       const matchSearch = 
@@ -59,19 +55,12 @@ export default function MyNotices({ setCurrentPage }: MyNoticesProps) {
       return matchSearch && matchFilter;
     })
     .sort((a, b) => {
-      if (sortBy === 'newest') {
-        return b.timestamp - a.timestamp;
-      }
-      if (sortBy === 'oldest') {
-        return a.timestamp - b.timestamp;
-      }
+      if (sortBy === 'newest') return b.timestamp - a.timestamp;
+      if (sortBy === 'oldest') return a.timestamp - b.timestamp;
       if (sortBy === 'deadline') {
-        // High urgency and defined deadlines first
         const aUrgency = a.deadline?.urgency === 'high' ? 3 : a.deadline?.urgency === 'medium' ? 2 : 1;
         const bUrgency = b.deadline?.urgency === 'high' ? 3 : b.deadline?.urgency === 'medium' ? 2 : 1;
         if (bUrgency !== aUrgency) return bUrgency - aUrgency;
-        
-        // Secondary sort on relative_days
         const aDays = a.deadline?.relative_days ?? 999;
         const bDays = b.deadline?.relative_days ?? 999;
         return aDays - bDays;
@@ -79,180 +68,164 @@ export default function MyNotices({ setCurrentPage }: MyNoticesProps) {
       return 0;
     });
 
-  // Get status color styling
-  const getUrgencyBadge = (urgency: string) => {
+  const getUrgencyColor = (urgency: string) => {
     switch (urgency?.toLowerCase()) {
       case 'high':
-        return 'bg-rose-50 text-rose-705 border border-rose-100';
+        return '#5B6CFF';
       case 'medium':
-        return 'bg-amber-50 text-amber-705 border border-amber-100';
+        return '#F4F2EC';
       case 'low':
-        return 'bg-emerald-50 text-emerald-705 border border-emerald-100';
+        return '#A8A8A0';
       default:
-        return 'bg-slate-50 text-slate-600 border border-slate-200';
+        return '#A8A8A0';
     }
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8">
+    <div className="w-full max-w-6xl mx-auto px-4 md:px-8 py-8 text-paper text-left">
       {/* Header section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-150 pb-6 mb-8 text-left">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-neutral/15 pb-6 mb-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-            My Notices Dashboard
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] font-mono tracking-[0.2em] text-accent uppercase font-semibold">
+              DOCUMENT ARCHIVE // SAVED
+            </span>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-black tracking-tight text-paper uppercase font-sans">
+            MY NOTICES ({notices.length})
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Browse and query all analyzed notices stored in history.
+          <p className="text-xs font-mono text-neutral/70 mt-1">
+            Browse and query all previously analyzed documents stored in local session.
           </p>
         </div>
         
         <button
           onClick={() => setCurrentPage('dashboard')}
-          className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors self-start sm:self-center"
+          className="flex items-center justify-center gap-2 rounded-lg bg-paper text-ink hover:bg-accent hover:text-white px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider transition-colors self-start sm:self-center cursor-pointer shadow-lg"
         >
-          <Plus size={16} />
-          Analyze New Notice
+          <Plus size={14} />
+          <span>Analyze New Notice</span>
         </button>
       </div>
 
       {/* Controls: Search, filter & sort */}
       {notices.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4 mb-6">
-          {/* Search bar */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-4 mb-8">
           <div className="relative md:col-span-2">
-            <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3.5 top-3 h-4 w-4 text-neutral/50" />
             <input
               type="text"
-              placeholder="Search by title or content..."
+              placeholder="Search by title, subject, or content..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-slate-250 bg-white pl-10 pr-4 py-2.5 text-xs text-slate-805 placeholder-slate-400 focus:border-indigo-500 focus:outline-none transition-colors"
+              className="w-full rounded-lg border border-neutral/20 bg-dark-gray/60 pl-10 pr-4 py-2.5 text-xs font-mono text-paper placeholder-neutral/40 focus:border-accent focus:outline-none transition-colors"
             />
           </div>
 
-          {/* Urgency Filter */}
           <div className="relative">
-            <Filter className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+            <Filter className="absolute left-3.5 top-3 h-4 w-4 text-neutral/50" />
             <select
               value={filterUrgency}
               onChange={(e) => setFilterUrgency(e.target.value as FilterOption)}
-              className="w-full appearance-none rounded-xl border border-slate-250 bg-white pl-10 pr-8 py-2.5 text-xs text-slate-805 placeholder-slate-405 focus:border-indigo-500 focus:outline-none transition-colors cursor-pointer"
+              className="w-full appearance-none rounded-lg border border-neutral/20 bg-dark-gray/60 pl-10 pr-8 py-2.5 text-xs font-mono text-paper focus:border-accent focus:outline-none transition-colors cursor-pointer uppercase"
             >
-              <option value="all">All Urgencies</option>
-              <option value="high">High Urgency</option>
-              <option value="medium">Medium Urgency</option>
-              <option value="low">Low Urgency</option>
+              <option value="all" className="bg-ink">ALL URGENCIES</option>
+              <option value="high" className="bg-ink">HIGH URGENCY</option>
+              <option value="medium" className="bg-ink">MEDIUM URGENCY</option>
+              <option value="low" className="bg-ink">LOW URGENCY</option>
             </select>
           </div>
 
-          {/* Sort selection */}
           <div className="relative">
-            <ArrowUpDown className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+            <ArrowUpDown className="absolute left-3.5 top-3 h-4 w-4 text-neutral/50" />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="w-full appearance-none rounded-xl border border-slate-250 bg-white pl-10 pr-8 py-2.5 text-xs text-slate-805 placeholder-slate-405 focus:border-indigo-500 focus:outline-none transition-colors cursor-pointer"
+              className="w-full appearance-none rounded-lg border border-neutral/20 bg-dark-gray/60 pl-10 pr-8 py-2.5 text-xs font-mono text-paper focus:border-accent focus:outline-none transition-colors cursor-pointer uppercase"
             >
-              <option value="newest">Sort: Newest First</option>
-              <option value="oldest">Sort: Oldest First</option>
-              <option value="deadline">Sort: By Deadline</option>
+              <option value="newest" className="bg-ink">SORT: NEWEST FIRST</option>
+              <option value="oldest" className="bg-ink">SORT: OLDEST FIRST</option>
+              <option value="deadline" className="bg-ink">SORT: BY DEADLINE</option>
             </select>
           </div>
         </div>
       )}
 
-      {/* Main content Area */}
+      {/* Main Content Area */}
       {notices.length === 0 ? (
-        /* Empty State */
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm max-w-xl mx-auto my-8">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-50 text-slate-450 mx-auto mb-5 border border-slate-100">
-            <Inbox size={24} />
+        <div className="rounded-xl border border-neutral/20 bg-dark-gray/40 p-12 text-center shadow-2xl max-w-lg mx-auto my-12">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-ink text-neutral mx-auto mb-5 border border-neutral/20">
+            <Inbox size={24} className="text-accent" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-            No notices yet
+          <h3 className="text-base font-mono font-bold text-paper tracking-wider uppercase">
+            NO NOTICES IN ARCHIVE
           </h3>
-          <p className="text-sm text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
-            Upload your first notice to build your action dashboard, extract deadlines and get a structured checklist.
+          <p className="text-xs font-mono text-neutral/70 mt-2 max-w-sm mx-auto leading-relaxed">
+            Upload your first notice to build an automated action plan, extract deadlines, and track your checklist.
           </p>
           <button
             onClick={() => setCurrentPage('dashboard')}
-            className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-indigo-650 px-5 py-3 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors mx-auto"
+            className="mt-6 flex items-center justify-center gap-2 rounded-lg bg-paper text-ink hover:bg-accent hover:text-white px-6 py-3 text-xs font-mono font-bold uppercase tracking-wider transition-colors mx-auto cursor-pointer"
           >
-            Upload Notice Now
+            <span>Upload Notice Now</span>
             <ArrowRight size={14} />
           </button>
         </div>
       ) : filteredNotices.length === 0 ? (
-        /* No results empty state */
-        <div className="text-center py-12">
-          <p className="text-sm font-semibold text-slate-500">No notices match your criteria.</p>
+        <div className="text-center py-16 border border-neutral/20 rounded-xl bg-dark-gray/30">
+          <p className="text-xs font-mono text-neutral">No notices match your current filters.</p>
           <button
             onClick={() => { setSearch(''); setFilterUrgency('all'); }}
-            className="text-xs text-indigo-600 font-bold hover:underline mt-2"
+            className="text-xs font-mono text-accent hover:underline mt-2 uppercase tracking-wider cursor-pointer"
           >
             Clear Search Filters
           </button>
         </div>
       ) : (
-        /* List of Notices */
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredNotices.map((notice) => {
+        /* Editorial Index Layout matching Scene 12 */
+        <div className="border-t border-neutral/15">
+          {filteredNotices.map((notice, i) => {
             const completedCount = notice.actions?.filter((a) => a.completed).length || 0;
             const totalCount = notice.actions?.length || 0;
+            const urgencyColor = getUrgencyColor(notice.deadline?.urgency || 'medium');
             
             return (
               <div
                 key={notice.id}
                 onClick={() => handleCardClick(notice.id)}
-                className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 text-left relative overflow-hidden hover:-translate-y-0.5"
+                className="group border-b border-neutral/15 py-6 md:py-8 cursor-pointer transition-all hover:pl-2 flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
-                <div>
-                  {/* Card Header metadata */}
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
-                      <Clock size={12} />
-                      {formatDate(notice.timestamp)}
-                    </span>
-                    <span className={`text-[10px] px-2 py-0.5 font-bold rounded-full uppercase ${getUrgencyBadge(notice.deadline?.urgency)}`}>
-                      {notice.deadline?.urgency || 'unknown'}
-                    </span>
+                <div className="flex items-start gap-6">
+                  <span className="font-mono text-2xl md:text-3xl font-light text-neutral/30 tabular-nums leading-none">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div>
+                    <h3 className="text-base md:text-lg font-bold text-paper uppercase tracking-tight group-hover:text-accent transition-colors font-mono">
+                      {notice.title}
+                    </h3>
+                    <p className="text-xs font-mono text-neutral/60 line-clamp-2 mt-1 max-w-2xl">
+                      {notice.summary}
+                    </p>
                   </div>
-
-                  <h3 className="text-base font-bold text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors line-clamp-1 mb-2">
-                    {notice.title}
-                  </h3>
-                  
-                  <p className="text-xs text-slate-500 line-clamp-3 mb-5 leading-relaxed">
-                    {notice.summary}
-                  </p>
                 </div>
 
-                <div className="border-t border-slate-100 pt-4 mt-auto">
-                  <div className="flex items-center justify-between">
-                    {/* Action plan checklist status */}
-                    <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1.5">
-                      <CheckCircle2 size={13} className="text-slate-400" />
-                      {completedCount}/{totalCount} Checklist items
-                    </span>
+                <div className="flex items-center gap-6 ml-12 md:ml-0 flex-shrink-0">
+                  <span
+                    className="text-xs font-mono font-bold tracking-widest uppercase"
+                    style={{ color: urgencyColor }}
+                  >
+                    {notice.deadline?.urgency || 'MEDIUM'}
+                  </span>
 
-                    {/* Deadline target */}
-                    {notice.deadline?.date && (
-                      <span className="text-[11px] font-bold text-indigo-600 flex items-center gap-1 bg-indigo-50 px-2 py-0.5 rounded">
-                        <Calendar size={12} />
-                        {notice.deadline.date}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Subtle checklist completion bar */}
-                  {totalCount > 0 && (
-                    <div className="w-full bg-slate-100 rounded-full h-1 mt-3 overflow-hidden">
-                      <div 
-                        className="bg-indigo-600 h-1 rounded-full transition-all duration-300"
-                        style={{ width: `${(completedCount / totalCount) * 100}%` }}
-                      />
-                    </div>
-                  )}
+                  <span className="text-[11px] font-mono text-neutral/60 tabular-nums">
+                    {notice.deadline?.date || formatDate(notice.timestamp)}
+                  </span>
+
+                  <span className="text-[10px] font-mono text-accent bg-accent/10 px-2 py-1 rounded border border-accent/20">
+                    {completedCount}/{totalCount} DONE
+                  </span>
+
+                  <ArrowRight size={14} className="text-neutral/40 group-hover:text-accent group-hover:translate-x-1 transition-all" />
                 </div>
               </div>
             );

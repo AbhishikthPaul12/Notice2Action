@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
+import { RefreshCw, AlertCircle, Sparkles, FileText, ArrowRight } from 'lucide-react';
 import UploadZone from '../components/UploadZone';
 import AnalysisLoader from '../components/AnalysisLoader';
 import AnalysisDashboard from '../components/AnalysisDashboard';
@@ -65,17 +65,17 @@ export default function Dashboard({ setCurrentPage, onNoticeAnalyzed }: Dashboar
     if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
       setError({
         title: 'Unable to connect to Notice2Action backend.',
-        message: 'Make sure the FastAPI server is running on port 8000 and try again.',
+        message: 'Ensure the FastAPI server is active on port 8000.',
       });
     } else if (err.message?.includes('quota') || err.message?.includes('rate limit')) {
       setError({
-        title: 'AI analysis limit reached.',
-        message: 'AI analysis is temporarily unavailable. Please check the API configuration or quota.',
+        title: 'AI model rate limit reached.',
+        message: 'AI quota is currently busy. Please wait a moment or try again.',
       });
     } else {
       setError({
-        title: 'Analysis failed',
-        message: err.message || 'An error occurred while processing the notice text.',
+        title: 'Document Analysis Failed',
+        message: err.message || 'An error occurred while parsing the document structure.',
       });
     }
   };
@@ -91,49 +91,52 @@ export default function Dashboard({ setCurrentPage, onNoticeAnalyzed }: Dashboar
   };
 
   return (
-    <div className="w-full">
-      {/* Hero section: only show when not displaying analysis results */}
+    <div className="w-full min-h-full bg-ink text-paper p-4 md:p-8">
+      {/* Editorial Headline: only show when not analyzing / displaying result */}
       {!analysisResult && !isAnalyzing && (
-        <div className="text-center py-12 px-4 max-w-3xl mx-auto">
-          <span className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-semibold gradient-badge shadow-sm">
-            <Sparkles size={13} className="text-indigo-600 dark:text-indigo-400 animate-pulse" />
-            Empowered by Actionable AI
-          </span>
+        <div className="text-center py-8 md:py-12 px-4 max-w-3xl mx-auto">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="w-4 h-px bg-accent" />
+            <span className="text-[10px] font-mono tracking-[0.25em] text-accent uppercase font-semibold">
+              DOCUMENT INTELLIGENCE WORKSTATION
+            </span>
+            <div className="w-4 h-px bg-accent" />
+          </div>
           
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mt-5 leading-tight">
-            Never miss an important <span className="gradient-text">notice again.</span>
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-paper uppercase leading-tight font-sans">
+            STOP SEARCHING. <span className="text-accent">START ACTING.</span>
           </h2>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-3.5 max-w-2xl mx-auto leading-relaxed">
-            Upload a document or paste text. Notice2Action extracts deadlines, eligibility, required actions, and critical information in under 30 seconds.
+          <p className="text-xs sm:text-sm font-mono text-neutral mt-3 max-w-xl mx-auto leading-relaxed">
+            Upload complex college circulars, scholarship announcements, or policy PDFs. Notice2Action instantly resolves deadlines, eligibility, and verified action plans.
           </p>
         </div>
       )}
 
-      {/* Main workspace container */}
-      <div className="mx-auto w-full max-w-7xl px-4 pb-12">
+      {/* Main Workspace Area */}
+      <div className="mx-auto w-full max-w-6xl pb-16">
         {isAnalyzing && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="rounded-xl border border-neutral/20 bg-dark-gray/60 p-6 md:p-12 shadow-2xl">
             <AnalysisLoader />
           </div>
         )}
 
         {error && (
-          <div className="max-w-2xl mx-auto rounded-2xl border border-rose-100 bg-rose-50/50 p-8 text-center shadow-sm">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600 mx-auto mb-4">
-              <AlertCircle size={24} />
+          <div className="max-w-2xl mx-auto rounded-xl border border-rose-800/40 bg-rose-950/30 p-8 text-center shadow-2xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-rose-900/40 text-rose-400 mx-auto mb-4 border border-rose-700/40">
+              <AlertCircle size={22} />
             </div>
             
-            <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+            <h3 className="text-base font-mono font-bold text-paper uppercase tracking-wider">
               {error.title}
             </h3>
-            <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto leading-relaxed">
+            <p className="text-xs font-mono text-neutral/80 mt-2 max-w-md mx-auto leading-relaxed">
               {error.message}
             </p>
             
             <div className="mt-6 flex justify-center gap-3">
               <button
                 onClick={handleReset}
-                className="rounded-xl bg-white border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+                className="rounded-lg bg-paper text-ink hover:bg-accent hover:text-white px-5 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
               >
                 Try Again
               </button>
@@ -147,17 +150,17 @@ export default function Dashboard({ setCurrentPage, onNoticeAnalyzed }: Dashboar
 
         {analysisResult && (
           <div className="space-y-6">
-            <div className="flex justify-end px-4">
+            <div className="flex justify-end px-2">
               <button
                 onClick={handleReset}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+                className="flex items-center gap-2 rounded-lg border border-neutral/20 bg-dark-gray hover:border-accent hover:text-white px-4 py-2 text-xs font-mono uppercase tracking-wider text-neutral transition-all cursor-pointer shadow-lg"
               >
-                <RefreshCw size={14} />
-                Analyze another notice
+                <RefreshCw size={13} className="text-accent" />
+                <span>Process Another Notice</span>
               </button>
             </div>
             
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="rounded-xl border border-neutral/20 bg-dark-gray/40 shadow-2xl overflow-hidden">
               <AnalysisDashboard 
                 analysis={analysisResult} 
                 onSave={handleUpdateNotice}

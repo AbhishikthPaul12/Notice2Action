@@ -42,18 +42,18 @@ export default function NoticeDetail({ noticeId, setCurrentPage }: NoticeDetailP
 
   if (error) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-4 py-16 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600 mx-auto mb-4">
-          <AlertCircle size={24} />
+      <div className="mx-auto w-full max-w-2xl px-4 py-16 text-center bg-ink text-paper">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-rose-950/50 text-rose-400 mx-auto mb-4 border border-rose-800/40">
+          <AlertCircle size={22} />
         </div>
-        <h3 className="text-lg font-bold text-slate-900 tracking-tight">Notice Not Found</h3>
-        <p className="text-sm text-slate-500 mt-2">{error}</p>
+        <h3 className="text-base font-mono font-bold uppercase tracking-wider">Notice Not Found</h3>
+        <p className="text-xs font-mono text-neutral/70 mt-2">{error}</p>
         <button
           onClick={handleBack}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-paper text-ink hover:bg-accent hover:text-white px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
         >
           <ArrowLeft size={14} />
-          Back to My Notices
+          <span>Back to Archive</span>
         </button>
       </div>
     );
@@ -62,24 +62,24 @@ export default function NoticeDetail({ noticeId, setCurrentPage }: NoticeDetailP
   if (!notice) return null;
 
   return (
-    <div className="w-full">
-      {/* Navigation Row */}
-      <div className="max-w-7xl mx-auto px-4 pt-6">
+    <div className="w-full bg-ink min-h-full pb-16">
+      <div className="max-w-6xl mx-auto px-6 pt-6 flex items-center justify-between">
         <button
           onClick={handleBack}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-indigo-600 transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-neutral hover:text-paper transition-colors cursor-pointer"
         >
           <ArrowLeft size={14} />
-          Back to My Notices
+          <span>← Back to Notices Archive</span>
         </button>
       </div>
 
-      {/* Main Analysis Dashboard wrapper */}
-      <AnalysisDashboard
-        analysis={notice}
-        onSave={handleUpdateNotice}
-        onDelete={handleDelete}
-      />
+      <div className="max-w-6xl mx-auto px-4 md:px-6 pt-4">
+        <AnalysisDashboard
+          analysis={notice}
+          onSave={handleUpdateNotice}
+          onDelete={handleDelete}
+        />
+      </div>
     </div>
   );
 }
