@@ -223,7 +223,7 @@ export default function Settings({ darkMode, onToggleDarkMode, user }: SettingsP
             </div>
             <div className="flex items-center justify-between pt-3">
               <span className="text-neutral/70">Backend Endpoint</span>
-              <span className="text-accent">http://127.0.0.1:8000</span>
+              <span className="text-accent">{import.meta.env.VITE_API_URL || 'https://notice2action-backend.onrender.com'}</span>
             </div>
             <div className="flex items-center justify-between pt-3">
               <span className="text-neutral/70">Active Session</span>
